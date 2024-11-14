@@ -7,7 +7,10 @@
 extern crate diesel;
 
 use actix_web::{error, get, middleware, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_files as fs;
+use actix_cors::Cors;
 use diesel::{prelude::*, r2d2};
+use serde::Serialize;
 use uuid::Uuid;
 
 mod actions;
@@ -74,29 +77,38 @@ async fn add_user(
     Ok(HttpResponse::Created().json(user))
 }
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    dotenvy::dotenv().ok();
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+#[derive(Serialize)]
+struct Slide {
+    url: String,
+    caption: String,
+    fullscreen: bool,
+    style: Option<String>,
+}
 
-    // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
-    let pool = initialize_db_pool();
+// This is a temporary route that returns sample data as a proof of concept
+async fn get_slides() -> impl Responder {
+    let sample_data = vec![
+        Slide {
+            url: "/wp-content/uploads/Fortidsvalet2024_Banner.jpg".to_string(),
+            caption: "Sample Image 1".to_string(),
+            fullscreen: false,
+            style: Some("width:100vw;z-index:10".to_string()),
+        },
+        Slide {
+            url: "/wp-content/uploads/Fortidsvalet2024_Banner.jpg".to_string(),
+            caption: "Sample Image 2".to_string(),
+            fullscreen: true,
+            style: None,
+        },
+        Slide {
+            url: "/wp-content/uploads/Fortidsvalet2024_Banner.jpg".to_string(),
+            caption: "Sample Image 3".to_string(),
+            fullscreen: false,
+            style: None,
+        },
+    ];
 
-    log::info!("starting HTTP server at http://localhost:8080");
-
-    HttpServer::new(move || {
-        App::new()
-            // add DB pool handle to app data; enables use of `web::Data<DbPool>` extractor
-            .app_data(web::Data::new(pool.clone()))
-            // add request logger middleware
-            .wrap(middleware::Logger::default())
-            // add route handlers
-            .service(get_user)
-            .service(add_user)
-    })
-    .bind(("127.0.0.1", 8080))?
-    .run()
-    .await
+    HttpResponse::Ok().json(sample_data)
 }
 
 /// Initialize database connection pool based on `DATABASE_URL` environment variable.
@@ -108,6 +120,44 @@ fn initialize_db_pool() -> DbPool {
     r2d2::Pool::builder()
         .build(manager)
         .expect("database URL should be valid path to SQLite DB file")
+}
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenvy::dotenv().ok();
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
+    // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
+    let pool = initialize_db_pool();
+
+    log::info!("starting HTTP server at http://localhost:8080");
+
+    HttpServer::new(move || {
+
+        //Temporarily allow everything for CORS
+        //Only for testing purposes, change later
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+
+        App::new()
+            .wrap(cors)
+            // This route is called /instagram in the frontend (for some reason). It should definitely be renamed
+            .route("/instagram", web::get().to(get_slides))
+            .service(fs::Files::new("/", "./screen-frontend-build"))
+            // add DB pool handle to app data; enables use of `web::Data<DbPool>` extractor
+            .app_data(web::Data::new(pool.clone()))
+            // add request logger middleware
+            .wrap(middleware::Logger::default())
+            // add route handlers
+            .service(get_user)
+            .service(add_user)
+    })
+    .bind(("127.0.0.1", 5000))?
+    .run()
+    .await
 }
 
 #[cfg(test)]
