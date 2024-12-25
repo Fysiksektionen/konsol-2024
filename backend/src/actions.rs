@@ -1,10 +1,12 @@
 use diesel::prelude::*;
-use uuid::Uuid;
+//use uuid::Uuid;
 
 use crate::models;
 
 type DbError = Box<dyn std::error::Error + Send + Sync>;
 
+
+/*
 /// Run query using Diesel to find user by uid and return it.
 pub fn find_user_by_uid(
     conn: &mut SqliteConnection,
@@ -39,3 +41,4 @@ pub fn insert_new_user(
 
     Ok(new_user)
 }
+ */

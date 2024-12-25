@@ -1,8 +1,10 @@
 // @generated automatically by Diesel CLI.
 
+
 diesel::table! {
-    users (id) {
+    settings (id) {
         id -> Text,
-        name -> Text,
+        dark_mode -> Bool,
+        slide_interval -> Integer,
     }
 }

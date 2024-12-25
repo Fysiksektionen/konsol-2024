@@ -6,8 +6,10 @@
 #[macro_use]
 extern crate diesel;
 
-use actix_web::{error, get, middleware, post, web, App, HttpResponse, HttpServer, Responder};
-use diesel::{prelude::*, r2d2};
+use actix_web::{error, get, middleware, post, web, App, HttpResponse, HttpServer, Responder, ResponseError};
+use diesel::{prelude::*, r2d2, sql_types::Json};
+use models::FrontendSettings;
+use serde::ser::Impossible;
 use uuid::Uuid;
 
 mod actions;
@@ -17,87 +19,56 @@ mod schema;
 /// Short-hand for the database pool type to use throughout the app.
 type DbPool = r2d2::Pool<r2d2::ConnectionManager<SqliteConnection>>;
 
-/// Finds user by UID.
-///
-/// Extracts:
-/// - the database pool handle from application data
-/// - a user UID from the request path
-#[get("/user/{user_id}")]
-async fn get_user(
-    pool: web::Data<DbPool>,
-    user_uid: web::Path<Uuid>,
-) -> actix_web::Result<impl Responder> {
-    let user_uid = user_uid.into_inner();
 
-    // use web::block to offload blocking Diesel queries without blocking server thread
-    let user = web::block(move || {
-        // note that obtaining a connection from the pool is also potentially blocking
-        let mut conn = pool.get()?;
-
-        actions::find_user_by_uid(&mut conn, user_uid)
-    })
-    .await?
-    // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
-
-    Ok(match user {
-        // user was found; return 200 response with JSON formatted user object
-        Some(user) => HttpResponse::Ok().json(user),
-
-        // user was not found; return 404 response with error message
-        None => HttpResponse::NotFound().body(format!("No user found with UID: {user_uid}")),
-    })
+fn initialize_settings(pool: &DbPool) {
+    let mut conn = pool.get().expect("Failed to get DB connection from pool");
+    FrontendSettings::initialize_from_db(&mut conn);
 }
 
-/// Creates new user.
-///
-/// Extracts:
-/// - the database pool handle from application data
-/// - a JSON form containing new user info from the request body
-#[post("/user")]
-async fn add_user(
-    pool: web::Data<DbPool>,
-    form: web::Json<models::NewUser>,
-) -> actix_web::Result<impl Responder> {
-    // use web::block to offload blocking Diesel queries without blocking server thread
-    let user = web::block(move || {
-        // note that obtaining a connection from the pool is also potentially blocking
-        let mut conn = pool.get()?;
 
-        actions::insert_new_user(&mut conn, &form.name)
-    })
-    .await?
-    // map diesel query errors to a 500 error response
-    .map_err(error::ErrorInternalServerError)?;
-
-    // user was added successfully; return 201 response with new user info
-    Ok(HttpResponse::Created().json(user))
+#[get("/settings")]
+async fn get_settings() -> impl Responder {
+    match FrontendSettings::get_state() {
+        Some(settings) => HttpResponse::Ok().json(settings), // Return JSON response
+        None => HttpResponse::NotFound().body("Settings not initialized"),
+    }
 }
+
+
+#[post("/settings")]
+async fn update_settings(
+    pool: web::Data<DbPool>,
+    new_settings: web::Json<FrontendSettings>,
+) -> impl Responder {
+    let mut conn = pool.get().expect("Failed to get DB connection from pool");
+    match FrontendSettings::update_state(&mut conn, new_settings.into_inner()) {
+        Ok(_) => HttpResponse::Ok().body("Settings updated"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Error: {:?}", e)),
+    }
+}
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
     let pool = initialize_db_pool();
+    initialize_settings(&pool); // Initialize the settings
 
     log::info!("starting HTTP server at http://localhost:8080");
 
     HttpServer::new(move || {
         App::new()
-            // add DB pool handle to app data; enables use of `web::Data<DbPool>` extractor
             .app_data(web::Data::new(pool.clone()))
-            // add request logger middleware
             .wrap(middleware::Logger::default())
-            // add route handlers
-            .service(get_user)
-            .service(add_user)
+            .service(get_settings) // Include route for settings
     })
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
 }
+
 
 /// Initialize database connection pool based on `DATABASE_URL` environment variable.
 ///
@@ -127,8 +98,8 @@ mod tests {
             App::new()
                 .app_data(web::Data::new(pool.clone()))
                 .wrap(middleware::Logger::default())
-                .service(get_user)
-                .service(add_user),
+                //.service(get_user)
+                //.service(add_user),
         )
         .await;
 
@@ -154,7 +125,7 @@ mod tests {
             "unexpected body: {body:?}",
         );
 
-        // create new user
+        /* // create new user
         let req = test::TestRequest::post()
             .uri("/user")
             .set_json(models::NewUser::new("Test user"))
@@ -173,6 +144,6 @@ mod tests {
         use crate::schema::users::dsl::*;
         diesel::delete(users.filter(id.eq(res.id)))
             .execute(&mut pool.get().expect("couldn't get db connection from pool"))
-            .expect("couldn't delete test user from table");
+            .expect("couldn't delete test user from table"); */
     }
 }
