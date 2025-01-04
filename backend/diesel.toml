@@ -4,6 +4,8 @@
 [print_schema]
 file = "src/schema.rs"
 custom_type_derives = ["diesel::query_builder::QueryId", "Clone"]
+filter = { only_tables = ["settings"] }
+with_docs = true
 
 [migrations_directory]
-dir = "./migrations"
+dir = "migrations"
