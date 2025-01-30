@@ -1,6 +1,4 @@
-use async_trait::async_trait;
 use diesel::prelude::*;
-use diesel::r2d2::Error as PoolError;
 use std::sync::{Arc, RwLock};
 use uuid::Uuid;
 

@@ -1,4 +1,3 @@
-// main.rs
 use actix_web::{web, App, HttpServer, HttpResponse};
 use actix_web::middleware::Logger;
 use diesel::r2d2::{self, ConnectionManager};
