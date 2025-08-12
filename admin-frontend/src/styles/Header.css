@@ -1,0 +1,37 @@
+.header {
+    overflow: hidden;
+    background-color: #231F20;
+    padding: 10px 10px;
+    /* position: fixed; */
+    /* height: 50px; */
+    
+    /* top: 0;
+    left: 0; */
+    /* width: 100%; */
+    text-align: left;
+    z-index: 1000;
+}
+
+.header .header-left {
+    float: left;
+    height: 100%;
+}
+.header .header-right {
+    float: right;
+    height: 100%;
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.header .header-left .logo {
+    float: left;
+    height: 100%;
+}
+
+.header .header-left .title {
+    float: left;
+    color: #FFFFFF;
+    font-size: 20px;
+    margin-left: 25px;
+    line-height: 100%;
+}

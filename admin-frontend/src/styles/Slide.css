@@ -1,21 +1,52 @@
 .slide {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: auto;
-    width: 15em;
-    background-color: #388bf7;
+    /* flex-basis: calc(100% - 20px); */
+    flex-direction: row;
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 5rem;
+    width: 100%;
+    background-color: #231F20;
     border-radius: 10px;
     padding: 10px;
-    margin: 8px; 
+    margin: 5px; 
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+.slide > * {
+    /* position: absolute; */
+    flex-grow: 1;
+    flex-shrink: 0;
+    height: auto;
+    text-align: center;
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+}
+
 .slide:hover {
     transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
 }
+
+.slide .remove-button {
+    flex-grow: 0;
+    position: relative;
+    top: calc(50% - 2rem);
+    height: 2.5em;
+    width: 2.5em;
+    right: 0;
+    background-color: #C02C33;
+    border-radius: 10px;
+    /* width: 2em; */
+    /* height: 2em; */
+    border: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 1.5em;
+    cursor: pointer;
+    overflow: hidden;
+
+}   
 
 h1 {
     font-size: 2em;
@@ -23,27 +54,32 @@ h1 {
 }
 
 
-.slides {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-}
-
 .slide .slide-header {
     overflow: hidden;
     height: 10em;
 }
 
 .slide .slide-image {
-    width: auto;
-    max-width: 100%;
+    flex-grow: 0;
+    object-fit: cover;
+    border-radius: 5px;
 }
 
-.slides-view {
-    width: 100%;
+.slide .indicator {
+    flex-grow: 0;
+    position: relative;
+    top: calc(50% - 0.75rem);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    margin: 0 1rem;
+    padding: 0;
+}
+
+.slide .indicator.active {
+    background-color: green;
+}
+
+.slide .indicator.inactive {
+    background-color: gray;
 }

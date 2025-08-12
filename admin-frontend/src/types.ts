@@ -9,15 +9,15 @@ interface SlideData {
     filetype: string;
 }
 
-interface User {
+interface UserData {
+    id: string;
     email: string;
+    admin: boolean;
 }
 
+interface User {
+    email: string;
+    permission: 'Admin' | 'User';
+}
 
-// type UserContextType = User | null;
-type UserContextType = {
-    user: User | null;
-    setUser: Dispatch<SetStateAction<User | null>>;
-};
-
-export type { SlideData, User, UserContextType };
+export type { SlideData, UserData, User };

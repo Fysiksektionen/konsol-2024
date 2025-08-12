@@ -1,0 +1,41 @@
+.slides-page {
+    flex: 1;
+    /* position: absolute; */
+    /* bottom: 0; */
+    width: 100%;
+    height: 100%;
+    /* height: calc(100% - 70px); 70px is header height plus extra padding */
+}
+
+.slides {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    /* justify-content: center; */
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.slides-header {
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 4rem;
+    padding: 10px;
+    background-color: #231F20;
+    color: white;
+    font-size: 1.5rem;
+}
+
+/* If the classes here seem weird, check out https://react-popup.elazizi.com/css-styling/ */
+.add-slide-popup-overlay .add-slide-popup-content {
+  color: white;
+  background-color: #231F20;
+  border-radius: 4px;
+  text-align: center;
+}

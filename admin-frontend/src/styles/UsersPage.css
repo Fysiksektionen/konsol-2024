@@ -1,0 +1,42 @@
+.users-page {
+    flex: 1;
+    /* position: absolute; */
+    /* bottom: 0; */
+    width: 100%;
+    height: 100%;
+    /* height: calc(100% - 70px); 70px is header height plus extra padding */
+}
+
+.users-header {
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 4rem;
+    padding: 10px;
+    background-color: #231F20;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.add-user-popup {
+    color: #231F20;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* If the classes here seem weird, check out https://react-popup.elazizi.com/css-styling/ */
+.add-user-popup-overlay .add-user-popup-content {
+  color: white;
+  background-color: #231F20;
+  border-radius: 4px;
+  text-align: center;
+}

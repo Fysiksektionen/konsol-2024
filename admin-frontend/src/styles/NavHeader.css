@@ -1,0 +1,23 @@
+.nav-header {
+    background-color: #231F20;
+    padding: 10px 20px;
+    border-bottom: 1px solid #eee;
+    overflow: hidden;
+}
+
+.nav-header a {
+    color: #FFFFFF;
+    text-decoration: none;
+    margin-right: 15px;
+    background-color: #231F20;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 16px;
+    
+}
+
+.nav-header a:hover {
+    background-color: #FFFFFF;
+    color: #231F20;
+}
