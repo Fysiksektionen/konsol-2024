@@ -74,10 +74,23 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     // Secret key for cookie session store
-    // TODO replace with good key stored somewhere else in production
-    let secret_key = Key::from("hejjakwdjaklwjdlka jwkldjalkwdjalkwjdlkajlkdja klwd231ahwdah widuhalwiudh aliuwhdjlad".as_bytes());
+    let secret_key_string = std::env::var("COOKIE_SECRET_KEY")
+        .unwrap_or_else(|_| {
+            log::warn!("COOKIE_SECRET_KEY not set; using default insecure key mashed key");
+            "hejjakwdjaklwjdlka jwkldjalkwdjalkwjdlkajlkdja klwd231ahwdah widuhalwiudh aliuwhdjlad".to_string()
+        });
+    let secret_key = Key::from(secret_key_string.as_bytes());
     
-
+    // Check if cookies should be sent only over HTTPS
+    let secure_cookies = std::env::var("COOKIE_SECURE")
+        .unwrap_or_else(|_| {
+            log::warn!("COOKIE_SECURE not set; defaulting to false");
+            "false".to_string()
+        })
+        .to_lowercase() == "true";
+    if !secure_cookies {
+        log::warn!("COOKIE_SECURE is false; cookies will be able to be sent over HTTP");
+    }
     // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
     let pool = initialize_db_pool();
 
@@ -94,7 +107,7 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("saving images at {SLIDE_IMAGE_DIR}");
 
-    log::info!("starting HTTP server at http://localhost:8080");
+    log::info!("starting Actix backend at http://0.0.0.0:8080");
 
 
     HttpServer::new(move || {
@@ -111,7 +124,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
-                .cookie_secure(false) //TODO set to true in production
+                .cookie_secure(secure_cookies) // Controlled via COOKIE_SECURE env var; should be true in production
                 .build()
                 )
             .wrap(cors)
@@ -135,11 +148,11 @@ async fn main() -> std::io::Result<()> {
 ///
 /// See more: <https://docs.rs/diesel/latest/diesel/r2d2/index.html>.
 fn initialize_db_pool() -> DbPool {
-    let conn_spec = std::env::var("DATABASE_URL").expect("DATABASE_URL should be set");
+    let conn_spec = std::env::var("DATABASE_URL").expect("DATABASE_URL is not set");
     let manager = r2d2::ConnectionManager::<SqliteConnection>::new(conn_spec);
     r2d2::Pool::builder()
         .build(manager)
-        .expect("database URL should be valid path to SQLite DB file")
+        .expect("DATABASE_URL should be valid path to SQLite DB file")
 }
 
 #[cfg(test)]

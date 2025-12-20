@@ -40,6 +40,9 @@ COPY --from=frontend-builder /out/admin /var/www/admin
 # Uncomment when screen frontend is ready
 COPY --from=frontend-builder /out/screen /var/www/screen
 
+# Remove the default nginx site that conflicts
+RUN rm -f /etc/nginx/sites-enabled/default
+
 COPY nginx.conf /etc/nginx/conf.d/app.conf
 
 EXPOSE 80
