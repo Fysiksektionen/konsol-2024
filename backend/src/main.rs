@@ -74,8 +74,12 @@ async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     // Secret key for cookie session store
-    // TODO replace with good key stored somewhere else in production
-    let secret_key = Key::from("hejjakwdjaklwjdlka jwkldjalkwdjalkwjdlkajlkdja klwd231ahwdah widuhalwiudh aliuwhdjlad".as_bytes());
+    let secret_key_string = std::env::var("COOKIE_SECRET_KEY")
+        .unwrap_or_else(|_| {
+            log::warn!("COOKIE_SECRET_KEY not set in environment, using default insecure key mashed key");
+            "hejjakwdjaklwjdlka jwkldjalkwdjalkwjdlkajlkdja klwd231ahwdah widuhalwiudh aliuwhdjlad".to_string()
+        });
+    let secret_key = Key::from(secret_key_string.as_bytes());
     
 
     // initialize DB pool outside of `HttpServer::new` so that it is shared across all workers
@@ -94,7 +98,7 @@ async fn main() -> std::io::Result<()> {
 
     log::info!("saving images at {SLIDE_IMAGE_DIR}");
 
-    log::info!("starting HTTP server at http://localhost:8080");
+    log::info!("starting Actix backend at http://0.0.0.0:8080");
 
 
     HttpServer::new(move || {
