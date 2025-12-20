@@ -8,6 +8,7 @@ services:
       - slides:/app/data/slides
     environment:
       - GOOGLE_ID_TOKEN=
+      - COOKIE_SECRET_KEY= 
       - DATABASE_URL=sqlite:///app/data/db/konsol.db
       - SLIDE_IMAGE_DIR=/app/data/slides
 
@@ -15,9 +16,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./outer-nginx.conf:/etc/nginx/conf.d/app.conf:ro
     ports:
       - "80:80"
     depends_on:
+      - web
       - backend
     restart: unless-stopped
 
