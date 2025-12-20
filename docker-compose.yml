@@ -8,7 +8,7 @@ services:
       - slides:/app/data/slides
     environment:
       - GOOGLE_ID_TOKEN=
-      - COOKIE_SECRET_KEY= 
+      # - COOKIE_SECRET_KEY= 
       - COOKIE_SECURE=false
       - DATABASE_URL=sqlite:///app/data/db/konsol.db
       - SLIDE_IMAGE_DIR=/app/data/slides
