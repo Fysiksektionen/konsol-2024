@@ -41,12 +41,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const handle = setInterval(() => {
-      sl.data.update().then(() => {
+    const updateSlData = () => sl.data.update().then(() => {
         setSl({data: sl.data});
       });
-    },
-      5 * 1000)
+    const handle = setInterval(updateSlData, 5 * 1000)
+    updateSlData();
     return () => clearInterval(handle);
   }, []);
 
