@@ -1,5 +1,5 @@
 #root {
-  display: grid;  
+  display: grid;
   grid-template-columns: 6fr 2fr;
   grid-template-rows: 1fr 15fr;
   margin: 0;
@@ -54,8 +54,12 @@
 }
 
 .sl-departure-list {
-  grid-row: 2;
   overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(10, 0.1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
 }
 
 .calendar-container {
@@ -64,6 +68,7 @@
   height: 100%;
   overflow: hidden;
 }
+
 .calendar-frame {
   filter: brightness(86%) invert(1) hue-rotate(180deg);
   background-color: #00000000;

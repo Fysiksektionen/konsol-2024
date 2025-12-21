@@ -1,62 +1,52 @@
 :root {
-    --color-dark-gray: #333;
-    --color-white: #fff;
+  --color-dark-gray: #333;
+  --color-white: #fff;
 
-    overflow: hidden;
+  overflow: hidden;
 }
 
 * {
-    margin: 0;
+  margin: 0;
 }
 
 p {
-    font-size: 1vw;
-    font-style: normal;
+  font-size: 1vw;
+  font-style: normal;
 }
 
-.sl-stop-point-name {
-    display: flex;
+.sl-departure-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  background-color: var(--color-dark-gray);
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
-.sl-departure {
-    display: grid;
-    grid-template-columns: 8fr 2fr 2fr 1fr;
-    margin: 0.3vh;
-    border: solid #555555 0.2vh ;
-    border-radius: 0.2vw;
-    height: 6.4%; /*experimentellt fastställd konstant som motsvarar 1/8 av hälften av 100 korrigerad för marginalerna mellan elementen*/
+.sl-departure-card-top {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: left;
 }
 
-.sl-departure-left {
-    grid-column: 1;
-    align-items: center;
+.sl-departure-card-top .sl-line-icon {
+  height: 3rem;
+  margin-right: 10px;
 }
 
-.sl-line-badge {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+.sl-departure-card-bottom {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
 }
 
-.sl-line-number {
-    align-self: center;
+.sl-next-departure {
+  font-size: 2rem;
 }
 
-.sl-departure>* {
-    margin: auto;
-}
-
-.sl-departure-left {
-    grid-column: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: space-evenly;
-    height: 100%;
-    margin: 0;
-}
-
-.sl-departure-left p {
-    padding-left: 0.2vw;
-    
+.sl-future-departures {
+  font-size: 1.5rem;
 }

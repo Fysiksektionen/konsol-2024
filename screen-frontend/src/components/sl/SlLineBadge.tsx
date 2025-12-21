@@ -1,5 +1,6 @@
 import React from "react";
 
+import "../../styles/sl/SlLineBadge.css";
 import "../../styles/sl/SlDepartureCard.css";
 
 import {SlLineGroup, SlTransportMode} from "../../types/sl/SlDeparture.ts";
