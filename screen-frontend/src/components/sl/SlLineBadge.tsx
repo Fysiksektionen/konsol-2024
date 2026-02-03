@@ -3,7 +3,7 @@ import React from "react";
 import "../../styles/sl/SlLineBadge.css";
 import "../../styles/sl/SlDepartureCard.css";
 
-import {SlLineGroup, SlTransportMode} from "../../types/sl/SlDeparture.ts";
+import { SlLineGroup, SlTransportMode } from "../../types/sl/SlDeparture.ts";
 
 // SVG:s shamelessly taken from sl.se Sök avgångar
 const icon_size = "2vw";
@@ -38,10 +38,10 @@ const metro_icon = <svg
         fill="var(--color-dark-gray)"
         rx="4"></rect>
     <path
-        fill="var(--color-white)"
-        fill-rule="evenodd"
-        d="M12 19a7 7 0 100-14 7 7 0 000 14zm8-7a8 8 0 11-16 0 8 8 0 0116 0zm-6.75-1.25h3.25v-2.5h-9v2.5h3.25v6.75h2.5v-6.75z"
-        clip-rule="evenodd"></path>
+        fill="#fff"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M12 19a7 7 0 100-14 7 7 0 000 14zm8-7a8 8 0 11-16 0 8 8 0 0116 0zm-6.75-1.25h3.25v-2.5h-9v2.5h3.25v6.75h2.5v-6.75z"></path>
 </svg>;
 
 const bus_icon = <svg
@@ -129,10 +129,10 @@ const get_badge_class = (line_group: SlLineGroup) => {
     }
 };
 
-const SlLineBadge: React.FC<{ mode: SlTransportMode, line_group: SlLineGroup, line_designation: string }> = ({mode, line_group, line_designation}) => {
+const SlLineBadge: React.FC<{ mode: SlTransportMode, line_group: SlLineGroup, line_designation: string }> = ({ mode, line_group, line_designation }) => {
     return <div className={`sl-line-badge ${get_badge_class(line_group)}`}>
         <div className="sl-line-number">
-            <p style={{fontSize:"1vw", paddingRight:"0.5vw"}}>{line_designation}</p>
+            {line_designation}
         </div>
         {get_svg(mode)}
     </div>;

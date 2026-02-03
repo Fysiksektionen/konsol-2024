@@ -12,10 +12,10 @@ const SlDepartureList: React.FC<{ sl_data: SlData }> = ({ sl_data }) => {
   if (sl_data.departures.length === 0) { return <div className="sl-departure-list">Laddar tidtabell...</div>; }
   return <div className="sl-departure-list">
     <div className="sl-departure-list-metro">
-      <h4>Tekniska Högskolan</h4>
+      <h4 className="sl-station-header">Tekniska Högskolan</h4>
       <SlDepartureCard departures={filter_departures(sl_data.departures, TEKNISKA_HSK, 1, SlTransportMode.Metro, 14)} />
       <SlDepartureCard departures={filter_departures(sl_data.departures, TEKNISKA_HSK, 2, SlTransportMode.Metro, 14)} />
-      <h4>Roslagsbanan</h4>
+      <h4 className="sl-station-header">Roslagsbanan</h4>
       <SlDepartureCard departures={filter_departures(sl_data.departures, TEKNISKA_HSK, 2, SlTransportMode.Tram, 27)} />
       <SlDepartureCard departures={filter_departures(sl_data.departures, TEKNISKA_HSK, 2, SlTransportMode.Tram, 28)} />
       <SlDepartureCard departures={filter_departures(sl_data.departures, TEKNISKA_HSK, 2, SlTransportMode.Tram, 29)} />
