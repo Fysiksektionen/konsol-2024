@@ -1,0 +1,4 @@
+/target
+.env
+/slide_images
+*.db

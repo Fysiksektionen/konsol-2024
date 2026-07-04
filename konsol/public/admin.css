@@ -1,0 +1,279 @@
+/* --- base (was admin-frontend/src/index.css) --- */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  height: 100%;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- App (was admin-frontend/src/styles/App.css) --- */
+.app-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 4.5rem 4.5rem 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  height: 100%;
+}
+
+/* --- Header (was admin-frontend/src/styles/Header.css) --- */
+.header {
+  overflow: hidden;
+  background-color: #231F20;
+  padding: 10px 10px;
+  text-align: left;
+  z-index: 1000;
+}
+
+.header .header-left {
+  float: left;
+  height: 100%;
+}
+.header .header-right {
+  float: right;
+  height: 100%;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.header .header-left .logo {
+  float: left;
+  height: 100%;
+}
+
+.header .header-left .title {
+  float: left;
+  color: #FFFFFF;
+  font-size: 20px;
+  margin-left: 25px;
+  line-height: 100%;
+}
+
+/* --- NavHeader (was admin-frontend/src/styles/NavHeader.css) --- */
+.nav-header {
+  background-color: #231F20;
+  padding: 10px 20px;
+  border-bottom: 1px solid #eee;
+  overflow: hidden;
+}
+
+.nav-header a {
+  color: #FFFFFF;
+  text-decoration: none;
+  margin-right: 15px;
+  background-color: #231F20;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+  font-size: 16px;
+}
+
+.nav-header a:hover {
+  background-color: #FFFFFF;
+  color: #231F20;
+}
+
+/* --- Slide (was admin-frontend/src/styles/Slide.css) --- */
+.slide {
+  display: flex;
+  flex-direction: row;
+  height: 5rem;
+  width: 100%;
+  background-color: #231F20;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.slide > * {
+  flex-grow: 1;
+  flex-shrink: 0;
+  height: auto;
+  text-align: center;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.slide:hover {
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+}
+
+.slide .remove-button {
+  flex-grow: 0;
+  position: relative;
+  top: calc(50% - 2rem);
+  height: 2.5em;
+  width: 2.5em;
+  right: 0;
+  background-color: #C02C33;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  font-size: 1.5em;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+h1 {
+  font-size: 2em;
+  font-weight: 500;
+}
+
+.slide .slide-header {
+  overflow: hidden;
+  height: 10em;
+}
+
+.slide .slide-image {
+  flex-grow: 0;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.slide .indicator {
+  flex-grow: 0;
+  position: relative;
+  top: calc(50% - 0.75rem);
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  margin: 0 1rem;
+  padding: 0;
+}
+
+.slide .indicator.active {
+  background-color: green;
+}
+
+.slide .indicator.inactive {
+  background-color: gray;
+}
+
+/* --- SlidesPage (was admin-frontend/src/styles/SlidesPage.css) --- */
+.slides-page {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.slides {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.slides-header {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+  padding: 10px;
+  background-color: #231F20;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.add-slide-popup-overlay .add-slide-popup-content {
+  color: white;
+  background-color: #231F20;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* --- User (was admin-frontend/src/styles/User.css) --- */
+.user {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  height: 3rem;
+  width: 100%;
+  background-color: #231F20;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.user > p {
+  flex: 1;
+  margin: 0;
+  color: #FFFFFF;
+}
+
+.user > .edit-button {
+  margin-left: 10px;
+  background-color: #FFFFFF;
+  color: #231F20;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* --- UsersPage (was admin-frontend/src/styles/UsersPage.css) --- */
+.users-page {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.users-header {
+  display: flex;
+  box-sizing: border-box;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+  padding: 10px;
+  background-color: #231F20;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.add-user-popup {
+  color: #231F20;
+  background-color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.add-user-popup-overlay .add-user-popup-content {
+  color: white;
+  background-color: #231F20;
+  border-radius: 4px;
+  text-align: center;
+}

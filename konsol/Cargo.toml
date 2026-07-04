@@ -1,0 +1,72 @@
+[package]
+name = "konsol"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+leptos = { version = "=0.8.20", features = ["multipart"] }
+leptos_axum = { version = "0.8", optional = true }
+leptos_meta = { version = "0.8" }
+leptos_router = { version = "0.8" }
+axum = { version = "0.8", optional = true }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"], optional = true }
+tower = { version = "0.5", optional = true }
+tower-http = { version = "0.6", features = ["fs"], optional = true }
+wasm-bindgen = "0.2"
+console_error_panic_hook = { version = "0.1", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+web-sys = { version = "0.3", features = [
+  "CustomEvent", "CustomEventInit", "Event", "Window",
+  "FormData", "HtmlFormElement", "HtmlInputElement", "File", "FileList",
+] }
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+gloo-net = { version = "0.6", features = ["json"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.6", features = ["v4", "serde", "js"] }
+
+# ssr-only
+diesel = { version = "2", features = ["sqlite", "r2d2", "chrono"], optional = true }
+diesel_migrations = { version = "2", optional = true }
+dotenvy = { version = "0.15.7", optional = true }
+env_logger = { version = "0.11.5", optional = true }
+log = { version = "0.4.22", optional = true }
+google-oauth = { version = "1.11.3", optional = true }
+cookie = { version = "0.18", features = ["private", "percent-encode"], optional = true }
+
+[features]
+hydrate = ["leptos/hydrate", "dep:console_error_panic_hook"]
+ssr = [
+  "dep:axum",
+  "dep:tokio",
+  "dep:tower",
+  "dep:tower-http",
+  "dep:leptos_axum",
+  "dep:diesel",
+  "dep:diesel_migrations",
+  "dep:dotenvy",
+  "dep:env_logger",
+  "dep:log",
+  "dep:google-oauth",
+  "dep:cookie",
+  "leptos/ssr",
+  "leptos_meta/ssr",
+  "leptos_router/ssr",
+]
+
+[package.metadata.leptos]
+output-name = "konsol"
+site-root = "target/site"
+site-pkg-dir = "pkg"
+assets-dir = "public"
+site-addr = "127.0.0.1:8080"
+reload-port = 3001
+browserquery = "defaults"
+bin-features = ["ssr"]
+bin-default-features = false
+lib-features = ["hydrate"]
+lib-default-features = false
