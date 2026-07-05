@@ -55,7 +55,11 @@ pub fn ScreenApp() -> impl IntoView {
 
 #[component]
 fn FullscreenSlideshowLayout(slides: Vec<Slide>) -> impl IntoView {
-    view! { <Slideshow slides=slides/> }
+    view! {
+        <div id="root">
+            <Slideshow slides=slides/>
+        </div>
+    }
 }
 
 #[component]
@@ -78,29 +82,31 @@ fn MixedLayout(slides: Vec<Slide>, departures: Vec<SlDeparture>, last_update: Op
         .unwrap_or_else(|| "Senast uppdaterad: Aldrig".to_string());
 
     view! {
-        <div class="header">
-            <img src="/assets/FrakturF2020.png" alt="Fraktur F" class="fysikf"/>
-            <h1>"KONSol"</h1>
-        </div>
+        <div id="root">
+            <div class="header">
+                <img src="/assets/FrakturF2020.png" alt="Fraktur F" class="fysikf"/>
+                <h1>"KONSol"</h1>
+            </div>
 
-        <div class="left">
-            {move || {
-                if active.get() == "slide" && has_slides {
-                    view! { <Slideshow slides=slides.clone()/> }.into_any()
-                } else {
-                    view! {
-                        <div class="calendar-container">
-                            <Calendar/>
-                        </div>
+            <div class="left">
+                {move || {
+                    if active.get() == "slide" && has_slides {
+                        view! { <Slideshow slides=slides.clone()/> }.into_any()
+                    } else {
+                        view! {
+                            <div class="calendar-container">
+                                <Calendar/>
+                            </div>
+                        }
+                            .into_any()
                     }
-                        .into_any()
-                }
-            }}
-        </div>
+                }}
+            </div>
 
-        <div class="right">
-            <p class="last-update">{last_update_text}</p>
-            <SlDepartureList departures=departures/>
+            <div class="right">
+                <p class="last-update">{last_update_text}</p>
+                <SlDepartureList departures=departures/>
+            </div>
         </div>
     }
 }
