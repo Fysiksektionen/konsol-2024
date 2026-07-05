@@ -1,0 +1,40 @@
+.sl-line-badge {
+  display: flex;
+  align-items: center;
+}
+
+.sl-line-badge .sl-line-number {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+  padding: 0.2em 0.5em;
+  background-color: var(--color-surface);
+  border-radius: 4px;
+  min-width: 2em;
+  text-align: center;
+  color: var(--color-text-primary);
+  border: 2px solid transparent;
+  /* Default border */
+}
+
+/* Red Metro - Solid Red Box */
+.sl-line-badge-red-metro .sl-line-number {
+  background-color: #d71d24;
+  color: #fff;
+  border-color: #d71d24;
+  min-width: 2.5rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 0 0.2rem;
+}
+
+/* Roslagsbanan - Solid Purple Box */
+.sl-line-badge-roslagen-line .sl-line-number {
+  background-color: #9f599a;
+  color: #fff;
+  border-color: #9f599a;
+  min-width: 2.5rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 0 0.2rem;
+}

@@ -2,38 +2,32 @@ import React from "react";
 
 import "../../styles/sl/SlDepartureCard.css";
 
-import {SlDeparture} from "../../types/sl/SlDeparture.ts";
 import SlLineBadge from "./SlLineBadge.tsx";
+import { SlDeparture } from "../../types/sl/SlDeparture.ts";
 
-const SlDepartureCard: React.FC<{ departure: SlDeparture }> = ({ departure }) => {
-    // == components ==
-    // stop point name
-    // transport mode
-    // line group
-    // line designation
-    // line destination
-    // via
-    //
-    // display time
-    // stop point designation
+// Only show `DEPARTURE_COUNT` number of departures that are more than `TIME_MARGIN_MS` ms in the future
+const TIME_MARGIN_MS = 6 * 60 * 1000;
+const DEPARTURE_COUNT = 4;
 
-    return (
-        <div className="sl-departure">
-            <div className="sl-departure-left">
-                <p className="sl-stop-point-name">{"från: " + departure.stop_point_name}</p>
-                <p className="sl-destination">{"till: " + departure.destination + (departure.via ? ` (via ${departure.via})` : "")}</p>
-            </div>
-            <div className="sl-departure-middle">
-                <SlLineBadge mode={departure.transport_mode} line_group={departure.line_group} line_designation={departure.line_designation}/>
-            </div>
-            <div className="sl-departure-middle-right">
-                <p className="sl-display-time large-text">{departure.display_time}</p>
-            </div>
-            <div className="sl-departure-right">
-                <p className="sl-stop-point large-text">{departure.stop_point_designation}</p>
-            </div>
-        </div>
-    )
+const SlDepartureCard: React.FC<{ departures: SlDeparture[] }> = ({ departures }) => {
+  if (departures.length === 0) { return <div className="sl-departure-card">---</div>; }
+  // Filter according to `TIME_MARGIN_MS` and limit to `DEPARTURE_COUNT`
+  departures = departures.filter(dep => dep.expected_time.getTime() >= new Date().getTime() + TIME_MARGIN_MS).slice(0, DEPARTURE_COUNT);
+  const firstDeparture = departures[0];
+  return (
+    <div className="sl-departure-card">
+
+      <div className="sl-departure-card-top">
+
+        <SlLineBadge mode={firstDeparture.transport_mode} line_group={firstDeparture.line_group} line_designation={firstDeparture.line_designation} />
+        <div className="sl-destination">{firstDeparture.destination}</div>
+      </div>
+      <div className="sl-departure-card-bottom">
+        <div className="sl-next-departure">{firstDeparture.display_time}</div>
+        <div className="sl-future-departures">{departures.slice(1).map(dep => dep.display_time).join(", ")}</div>
+      </div>
+    </div>
+  )
 };
 
 export default SlDepartureCard;
