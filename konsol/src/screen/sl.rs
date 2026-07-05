@@ -100,6 +100,7 @@ struct RawDeparture {
     via: Option<String>,
     direction_code: i64,
     display: String,
+    expected: String,
     journey: RawJourney,
     stop_point: RawStopPoint,
     line: RawLine,
@@ -129,7 +130,7 @@ struct RawLine {
 }
 
 #[cfg(feature = "hydrate")]
-fn parse_departure(raw: RawDeparture, site_id: u32) -> Result<SlDeparture, String> {
+fn parse_departure(raw: RawDeparture, site_id: u32) -> Result<(SlDeparture, f64), String> {
     let transport_mode = SlTransportMode::try_from(raw.line.transport_mode.as_str())?;
     let line_group = match raw.line.group_of_lines.as_deref() {
         Some(s) => SlLineGroup::try_from(s)?,
@@ -137,20 +138,24 @@ fn parse_departure(raw: RawDeparture, site_id: u32) -> Result<SlDeparture, Strin
         None => return Err("Expected line group".to_string()),
     };
     let _ = raw.journey; // parity with the fields the previous TS type carried, unused in rendering
+    let expected_ms = js_sys::Date::parse(&raw.expected);
 
-    Ok(SlDeparture {
-        site_id,
-        transport_mode,
-        line_group,
-        line_id: raw.line.id,
-        direction_code: raw.direction_code,
-        stop_point_name: raw.stop_point.name,
-        stop_point_designation: raw.stop_point.designation.unwrap_or_default(),
-        destination: raw.destination,
-        via: raw.via,
-        line_designation: raw.line.designation,
-        display_time: raw.display,
-    })
+    Ok((
+        SlDeparture {
+            site_id,
+            transport_mode,
+            line_group,
+            line_id: raw.line.id,
+            direction_code: raw.direction_code,
+            stop_point_name: raw.stop_point.name,
+            stop_point_designation: raw.stop_point.designation.unwrap_or_default(),
+            destination: raw.destination,
+            via: raw.via,
+            line_designation: raw.line.designation,
+            display_time: raw.display,
+        },
+        expected_ms,
+    ))
 }
 
 #[cfg(not(feature = "hydrate"))]
@@ -170,8 +175,15 @@ pub fn start_polling(set_departures: WriteSignal<Vec<SlDeparture>>, set_last_upd
     );
 }
 
+/// Only show departures more than this far in the future — matches the
+/// previous screen-frontend's `TIME_MARGIN_MS`, so a departure isn't shown
+/// (and then vanishes) in the last few minutes before it actually leaves.
+#[cfg(feature = "hydrate")]
+const TIME_MARGIN_MS: f64 = 6.0 * 60.0 * 1000.0;
+
 #[cfg(feature = "hydrate")]
 async fn fetch_all(set_departures: WriteSignal<Vec<SlDeparture>>, set_last_update: WriteSignal<Option<String>>) {
+    let now_ms = js_sys::Date::now();
     let mut all = Vec::new();
     for &site_id in TRACKED_SITES {
         let url = format!("https://transport.integration.sl.se/v1/sites/{site_id}/departures");
@@ -185,7 +197,11 @@ async fn fetch_all(set_departures: WriteSignal<Vec<SlDeparture>>, set_last_updat
         };
         for raw in parsed.departures {
             match parse_departure(raw, site_id) {
-                Ok(d) => all.push(d),
+                Ok((d, expected_ms)) => {
+                    if expected_ms >= now_ms + TIME_MARGIN_MS {
+                        all.push(d);
+                    }
+                }
                 Err(e) => leptos::logging::error!("{e}"),
             }
         }
@@ -199,46 +215,88 @@ async fn fetch_all(set_departures: WriteSignal<Vec<SlDeparture>>, set_last_updat
     ));
 }
 
+/// Number of upcoming departures shown per card (one next-departure headline
+/// plus a few more in the smaller "future departures" line).
+const DEPARTURE_COUNT: usize = 4;
+const TEKNISKA_HSK: u32 = 9204;
+
 #[component]
 pub fn SlDepartureList(departures: Vec<SlDeparture>) -> impl IntoView {
+    if departures.is_empty() {
+        return view! { <div class="sl-departure-list">"Laddar tidtabell..."</div> }.into_any();
+    }
+
+    let metro1 = filter_departures(&departures, TEKNISKA_HSK, 1, SlTransportMode::Metro, 14);
+    let metro2 = filter_departures(&departures, TEKNISKA_HSK, 2, SlTransportMode::Metro, 14);
+    let tram27 = filter_departures(&departures, TEKNISKA_HSK, 2, SlTransportMode::Tram, 27);
+    let tram28 = filter_departures(&departures, TEKNISKA_HSK, 2, SlTransportMode::Tram, 28);
+    let tram29 = filter_departures(&departures, TEKNISKA_HSK, 2, SlTransportMode::Tram, 29);
+
     view! {
         <div class="sl-departure-list">
-            {departures
-                .into_iter()
-                .map(|d| view! { <SlDepartureCard departure=d/> })
-                .collect_view()}
+            <div class="sl-departure-list-metro">
+                <h4 class="sl-station-header">"Tekniska Högskolan"</h4>
+                <SlDepartureCard departures=metro1/>
+                <SlDepartureCard departures=metro2/>
+                <h4 class="sl-station-header">"Roslagsbanan"</h4>
+                <SlDepartureCard departures=tram27/>
+                <SlDepartureCard departures=tram28/>
+                <SlDepartureCard departures=tram29/>
+            </div>
         </div>
     }
+        .into_any()
+}
+
+fn filter_departures(
+    departures: &[SlDeparture],
+    site_id: u32,
+    direction_code: i64,
+    transport_mode: SlTransportMode,
+    line_id: i64,
+) -> Vec<SlDeparture> {
+    departures
+        .iter()
+        .filter(|d| {
+            d.site_id == site_id
+                && d.direction_code == direction_code
+                && d.transport_mode == transport_mode
+                && d.line_id == line_id
+        })
+        .take(DEPARTURE_COUNT)
+        .cloned()
+        .collect()
 }
 
 #[component]
-fn SlDepartureCard(departure: SlDeparture) -> impl IntoView {
-    let via_suffix = departure
-        .via
-        .as_ref()
-        .map(|via| format!(" (via {via})"))
-        .unwrap_or_default();
+fn SlDepartureCard(departures: Vec<SlDeparture>) -> impl IntoView {
+    if departures.is_empty() {
+        return view! { <div class="sl-departure-card">"---"</div> }.into_any();
+    }
+    let first = departures[0].clone();
+    let future = departures[1..]
+        .iter()
+        .map(|d| d.display_time.clone())
+        .collect::<Vec<_>>()
+        .join(", ");
+
     view! {
-        <div class="sl-departure">
-            <div class="sl-departure-left">
-                <p class="sl-stop-point-name">{format!("från: {}", departure.stop_point_name)}</p>
-                <p class="sl-destination">{format!("till: {}{}", departure.destination, via_suffix)}</p>
-            </div>
-            <div class="sl-departure-middle">
+        <div class="sl-departure-card">
+            <div class="sl-departure-card-top">
                 <SlLineBadge
-                    mode=departure.transport_mode
-                    line_group=departure.line_group
-                    line_designation=departure.line_designation.clone()
+                    mode=first.transport_mode
+                    line_group=first.line_group
+                    line_designation=first.line_designation.clone()
                 />
+                <div class="sl-destination">{first.destination.clone()}</div>
             </div>
-            <div class="sl-departure-middle-right">
-                <p class="sl-display-time large-text">{departure.display_time.clone()}</p>
-            </div>
-            <div class="sl-departure-right">
-                <p class="sl-stop-point large-text">{departure.stop_point_designation.clone()}</p>
+            <div class="sl-departure-card-bottom">
+                <div class="sl-next-departure">{first.display_time.clone()}</div>
+                <div class="sl-future-departures">{future}</div>
             </div>
         </div>
     }
+        .into_any()
 }
 
 fn badge_class(line_group: SlLineGroup) -> &'static str {
@@ -259,9 +317,7 @@ fn SlLineBadge(mode: SlTransportMode, line_group: SlLineGroup, line_designation:
     let class = format!("sl-line-badge {}", badge_class(line_group));
     view! {
         <div class=class>
-            <div class="sl-line-number">
-                <p style="font-size:1vw;padding-right:0.5vw;">{line_designation}</p>
-            </div>
+            <div class="sl-line-number">{line_designation}</div>
             <TransportIcon mode=mode/>
         </div>
     }
