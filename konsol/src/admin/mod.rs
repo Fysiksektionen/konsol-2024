@@ -3,7 +3,9 @@ use leptos_meta::Stylesheet;
 use leptos_router::components::{Outlet, A};
 use wasm_bindgen::JsCast;
 
-use crate::api::auth::{add_user, auth_status, list_users, logout, remove_user, verify_google_credential};
+use crate::api::auth::{
+    add_user, auth_status, get_google_client_id, list_users, logout, remove_user, verify_google_credential,
+};
 use crate::api::slides::{delete_slide, get_slides, upload_slide};
 use crate::client_util::{truncate_chars, window_confirm};
 use crate::models::{AuthenticatedUser, PermissionLevel, Slide, User};
@@ -12,11 +14,6 @@ use crate::models::{AuthenticatedUser, PermissionLevel, Slide, User};
 /// `Some(Some(user))` = logged in. Mirrors the previous admin-frontend's
 /// `User | null | undefined` state exactly.
 type AuthState = Option<Option<AuthenticatedUser>>;
-
-const GOOGLE_CLIENT_ID: &str = match option_env!("VITE_GOOGLE_CLIENT_ID") {
-    Some(id) => id,
-    None => "",
-};
 
 #[component]
 pub fn AdminApp() -> impl IntoView {
@@ -88,6 +85,8 @@ fn NavHeader(user: ReadSignal<AuthState>) -> impl IntoView {
 
 #[component]
 fn UserStatus(user: ReadSignal<AuthState>, set_user: WriteSignal<AuthState>) -> impl IntoView {
+    let client_id = Resource::new(|| (), |_| get_google_client_id());
+
     Effect::new(move |_| {
         let closure = wasm_bindgen::closure::Closure::<dyn Fn(web_sys::Event)>::new(
             move |ev: web_sys::Event| {
@@ -121,17 +120,22 @@ fn UserStatus(user: ReadSignal<AuthState>, set_user: WriteSignal<AuthState>) -> 
         {move || match user.get() {
             None => view! { <p>"Loading..."</p> }.into_any(),
             Some(None) => {
-                view! {
-                    <div>
-                        <div
-                            id="g_id_onload"
-                            data-client_id=GOOGLE_CLIENT_ID
-                            data-callback="handleCredentialResponse"
-                        ></div>
-                        <div class="g_id_signin"></div>
-                    </div>
+                match client_id.get() {
+                    Some(Ok(id)) => {
+                        view! {
+                            <div>
+                                <div id="g_id_onload" data-client_id=id data-callback="handleCredentialResponse"></div>
+                                <div class="g_id_signin"></div>
+                            </div>
+                        }
+                            .into_any()
+                    }
+                    Some(Err(e)) => {
+                        leptos::logging::error!("Failed to fetch Google client ID: {e}");
+                        view! { <p>"Login unavailable"</p> }.into_any()
+                    }
+                    None => view! { <p>"Loading..."</p> }.into_any(),
                 }
-                    .into_any()
             }
             Some(Some(u)) => {
                 let is_admin = u.permission == PermissionLevel::Admin;
