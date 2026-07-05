@@ -85,7 +85,13 @@ fn NavHeader(user: ReadSignal<AuthState>) -> impl IntoView {
 
 #[component]
 fn UserStatus(user: ReadSignal<AuthState>, set_user: WriteSignal<AuthState>) -> impl IntoView {
-    let client_id = Resource::new(|| (), |_| get_google_client_id());
+    // LocalResource (not Resource): this is only ever needed client-side to
+    // render the Google button, and reading a Resource outside a Suspense
+    // caused a hydration-mismatch warning that made the button's DOM node
+    // get torn down and recreated right after Google's script had already
+    // wired an interactive button into it — LocalResource never resolves
+    // during SSR, so there's nothing for hydration to mismatch against.
+    let client_id = LocalResource::new(|| get_google_client_id());
 
     Effect::new(move |_| {
         let closure = wasm_bindgen::closure::Closure::<dyn Fn(web_sys::Event)>::new(
