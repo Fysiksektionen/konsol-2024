@@ -128,9 +128,20 @@ fn UserStatus(user: ReadSignal<AuthState>, set_user: WriteSignal<AuthState>) -> 
             Some(None) => {
                 match client_id.get() {
                     Some(Ok(id)) => {
+                        // auto_prompt=false disables Google's One Tap overlay, which
+                        // uses the browser's FedCM API and fails/vanishes on its own
+                        // (independent of anything below) when there's no active
+                        // FedCM-eligible session — leaving just the persistent
+                        // .g_id_signin button, which uses the regular OAuth popup
+                        // flow and doesn't depend on FedCM succeeding.
                         view! {
                             <div>
-                                <div id="g_id_onload" data-client_id=id data-callback="handleCredentialResponse"></div>
+                                <div
+                                    id="g_id_onload"
+                                    data-client_id=id
+                                    data-callback="handleCredentialResponse"
+                                    data-auto_prompt="false"
+                                ></div>
                                 <div class="g_id_signin"></div>
                             </div>
                         }
