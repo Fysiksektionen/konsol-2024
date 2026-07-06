@@ -265,7 +265,10 @@ button:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 80px;
+  /* Fixed rather than min-width so every card's date column lines up; sized
+     to fit the widest sv-SE short date ("mån 16 mars" ≈ 113px at 1.1rem
+     bold) plus the right padding and border. */
+  width: 135px;
   text-align: center;
   border-right: 1px solid var(--color-border);
   padding-right: 1rem;
