@@ -47,7 +47,13 @@ pub async fn auth_status() -> Result<AuthenticatedUser, ServerFnError> {
 /// cross the client/server boundary at request time instead.
 #[server(prefix = "/konsol/api")]
 pub async fn get_google_client_id() -> Result<String, ServerFnError> {
-    std::env::var("GOOGLE_ID_TOKEN").map_err(|_| ServerFnError::new("GOOGLE_ID_TOKEN not set"))
+    // Treat empty the same as unset (e.g. docker-compose ships
+    // `GOOGLE_ID_TOKEN=`), so the admin page shows "Login unavailable"
+    // instead of rendering a Google button with an empty client ID.
+    std::env::var("GOOGLE_ID_TOKEN")
+        .ok()
+        .filter(|v| !v.is_empty())
+        .ok_or_else(|| ServerFnError::new("GOOGLE_ID_TOKEN not set"))
 }
 
 #[server(prefix = "/konsol/api")]
