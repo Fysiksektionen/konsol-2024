@@ -169,6 +169,8 @@ const LIVE_RELOAD_INTERVAL_MS: i32 = 3 * 60_000;
 /// Turn whatever Google Slides link was pasted into settings (an /edit link
 /// from the address bar, a published /pub link, or already an /embed link)
 /// into the embedded-player URL with auto-advance and looping enabled.
+/// rm=minimal removes the player's bottom control bar; it doesn't affect
+/// autoplay or looping.
 fn google_slides_embed_url(url: &str) -> String {
     let base = url.split(['#', '?']).next().unwrap_or(url);
     let base = base.trim_end_matches('/');
@@ -179,7 +181,7 @@ fn google_slides_embed_url(url: &str) -> String {
         .or_else(|| base.strip_suffix("/present"))
         .or_else(|| base.strip_suffix("/preview"))
         .unwrap_or(base);
-    format!("{base}/embed?start=true&loop=true&delayms=3000")
+    format!("{base}/embed?start=true&loop=true&delayms=3000&rm=minimal")
 }
 
 #[component]
@@ -207,7 +209,8 @@ fn LiveSlides(url: String) -> impl IntoView {
 mod tests {
     use super::google_slides_embed_url;
 
-    const EMBED: &str = "https://docs.google.com/presentation/d/abc123/embed?start=true&loop=true&delayms=3000";
+    const EMBED: &str =
+        "https://docs.google.com/presentation/d/abc123/embed?start=true&loop=true&delayms=3000&rm=minimal";
 
     #[test]
     fn edit_link() {
