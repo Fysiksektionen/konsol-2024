@@ -37,12 +37,16 @@ pub fn ScreenApp() -> impl IntoView {
                             .into_any()
                     }
                     _ => {
+                        // Pass the polled signals themselves, not their current
+                        // values: reading them here would re-run this whole
+                        // closure (recreating the layout, and with it the live
+                        // slides iframe) on every departures poll.
                         view! {
                             <MixedLayout
                                 slides=slides_list
                                 live_url=live_url
-                                departures=departures.get()
-                                last_update=last_update.get()
+                                departures=departures
+                                last_update=last_update
                             />
                         }
                             .into_any()
@@ -69,26 +73,22 @@ fn FullscreenSlideshowLayout(slides: Vec<Slide>, live_url: Option<String>) -> im
 fn MixedLayout(
     slides: Vec<Slide>,
     live_url: Option<String>,
-    departures: Vec<SlDeparture>,
-    last_update: Option<String>,
+    departures: ReadSignal<Vec<SlDeparture>>,
+    last_update: ReadSignal<Option<String>>,
 ) -> impl IntoView {
-    let (active, set_active) = signal("slide".to_string());
+    let (show_slide, set_show_slide) = signal(true);
 
     Effect::new(move |_| {
-        set_interval(
-            move || {
-                set_active
-                    .update(|a| *a = if a == "slide" { "calendar".to_string() } else { "slide".to_string() });
-            },
-            15_000,
-        );
+        set_interval(move || set_show_slide.update(|s| *s = !*s), 15_000);
     });
 
     let has_slides = !slides.is_empty() || live_url.is_some();
-    let last_update_text = last_update
-        .map(|t| format!("Senast uppdaterad: {t}"))
-        .unwrap_or_else(|| "Senast uppdaterad: Aldrig".to_string());
+    let slide_visible = move || show_slide.get() && has_slides;
 
+    // Both panels stay mounted and alternate via display toggling rather than
+    // being swapped in and out of the DOM: unmounting would reload the live
+    // slides iframe on every cycle and re-register the components' intervals
+    // each time they came back.
     view! {
         <div id="root">
             <div class="header">
@@ -97,27 +97,35 @@ fn MixedLayout(
             </div>
 
             <div class="left">
-                {move || {
-                    if active.get() == "slide" && has_slides {
-                        if let Some(url) = live_url.clone() {
-                            view! { <LiveSlides url=url/> }.into_any()
-                        } else {
-                            view! { <Slideshow slides=slides.clone()/> }.into_any()
-                        }
-                    } else {
-                        view! {
-                            <div class="calendar-container">
-                                <Calendar/>
-                            </div>
-                        }
-                            .into_any()
-                    }
-                }}
+                <div
+                    class="left-panel"
+                    style:display=move || if slide_visible() { "contents" } else { "none" }
+                >
+                    {match live_url {
+                        Some(url) => view! { <LiveSlides url=url/> }.into_any(),
+                        None => view! { <Slideshow slides=slides/> }.into_any(),
+                    }}
+                </div>
+                <div
+                    class="left-panel"
+                    style:display=move || if slide_visible() { "none" } else { "contents" }
+                >
+                    <div class="calendar-container">
+                        <Calendar/>
+                    </div>
+                </div>
             </div>
 
             <div class="right">
-                <p class="last-update">{last_update_text}</p>
-                <SlDepartureList departures=departures/>
+                <p class="last-update">
+                    {move || {
+                        last_update
+                            .get()
+                            .map(|t| format!("Senast uppdaterad: {t}"))
+                            .unwrap_or_else(|| "Senast uppdaterad: Aldrig".to_string())
+                    }}
+                </p>
+                {move || view! { <SlDepartureList departures=departures.get()/> }}
             </div>
         </div>
     }
