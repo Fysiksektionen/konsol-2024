@@ -6,6 +6,7 @@ use wasm_bindgen::JsCast;
 use crate::api::auth::{
     add_user, auth_status, get_google_client_id, list_users, logout, remove_user, verify_google_credential,
 };
+use crate::api::settings::{get_settings, update_settings};
 use crate::api::slides::{delete_slide, get_slides, upload_slide};
 use crate::client_util::{truncate_chars, window_confirm};
 use crate::models::{AuthenticatedUser, PermissionLevel, Slide, User};
@@ -73,6 +74,9 @@ fn NavHeader(user: ReadSignal<AuthState>) -> impl IntoView {
         <div class="nav-header">
             <A href="/konsol/admin/slides" attr:class="slides-page-button">
                 "Slides"
+            </A>
+            <A href="/konsol/admin/settings" attr:class="settings-page-button">
+                "Settings"
             </A>
             <Show when=is_admin>
                 <A href="/konsol/admin/users" attr:class="users-page-button">
@@ -275,6 +279,104 @@ fn SlideCard(slide: Slide, on_removed: impl Fn() + Copy + 'static) -> impl IntoV
             <button class="remove-button" on:click=handle_remove>
                 "X"
             </button>
+        </div>
+    }
+}
+
+#[component]
+pub fn SettingsPage() -> impl IntoView {
+    let settings = Resource::new(|| (), |_| get_settings());
+
+    let save = Action::new(move |(layout, live, url): &(String, bool, String)| {
+        let layout = layout.clone();
+        let live = *live;
+        let url = url.clone();
+        async move {
+            let result = update_settings(layout, live, url).await;
+            if result.is_ok() {
+                settings.refetch();
+            }
+            result
+        }
+    });
+
+    let on_submit = move |ev: leptos::ev::SubmitEvent| {
+        ev.prevent_default();
+        let target = ev.target().unwrap().unchecked_into::<web_sys::HtmlFormElement>();
+        let form_data = web_sys::FormData::new_with_form(&target).unwrap();
+        let layout = form_data.get("layout_type").as_string().unwrap_or_default();
+        // Checkboxes are only present in form data when checked.
+        let live = form_data.get("live_mode").as_string().as_deref() == Some("on");
+        let url = form_data.get("live_slides_url").as_string().unwrap_or_default();
+        save.dispatch((layout, live, url));
+    };
+
+    view! {
+        <div class="settings-page">
+            <h1>"Settings"</h1>
+            <Suspense fallback=|| view! { <p>"Loading..."</p> }>
+                {move || {
+                    settings
+                        .get()
+                        .map(|result| match result {
+                            Ok(s) => {
+                                view! {
+                                    <form class="settings-form" on:submit=on_submit>
+                                        <label for="layout_type">"Screen layout"</label>
+                                        <select id="layout_type" name="layout_type">
+                                            <option value="mixed" selected=s.layout_type == "mixed">
+                                                "Mixed (slides + departures)"
+                                            </option>
+                                            <option
+                                                value="fullscreen_slideshow"
+                                                selected=s.layout_type == "fullscreen_slideshow"
+                                            >
+                                                "Fullscreen slideshow"
+                                            </option>
+                                        </select>
+
+                                        <label for="live_mode" class="live-mode-toggle">
+                                            <input
+                                                type="checkbox"
+                                                id="live_mode"
+                                                name="live_mode"
+                                                checked=s.live_mode
+                                            />
+                                            "Live mode"
+                                        </label>
+                                        <p class="settings-hint">
+                                            "Show a public Google Slides presentation instead of the uploaded slides. The screen follows along when the presentation is edited."
+                                        </p>
+
+                                        <label for="live_slides_url">"Google Slides URL"</label>
+                                        <input
+                                            type="url"
+                                            id="live_slides_url"
+                                            name="live_slides_url"
+                                            placeholder="https://docs.google.com/presentation/d/..."
+                                            value=s.live_slides_url
+                                        />
+
+                                        <button type="submit">"Save"</button>
+                                    </form>
+                                }
+                                    .into_any()
+                            }
+                            Err(e) => view! { <p>"Failed to load settings: " {e.to_string()}</p> }.into_any(),
+                        })
+                }}
+            </Suspense>
+            {move || {
+                save.value()
+                    .get()
+                    .map(|result| match result {
+                        Ok(_) => view! { <p class="save-status">"Saved."</p> }.into_any(),
+                        Err(e) => {
+                            view! { <p class="save-status save-error">"Save failed: " {e.to_string()}</p> }
+                                .into_any()
+                        }
+                    })
+            }}
         </div>
     }
 }

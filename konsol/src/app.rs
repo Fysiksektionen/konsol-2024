@@ -6,7 +6,7 @@ use leptos_router::{
     StaticSegment,
 };
 
-use crate::admin::{AdminApp, SlidesPage, UsersPageGate};
+use crate::admin::{AdminApp, SettingsPage, SlidesPage, UsersPageGate};
 use crate::screen::ScreenApp;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
@@ -37,6 +37,7 @@ pub fn App() -> impl IntoView {
                 <ParentRoute path=(StaticSegment("konsol"), StaticSegment("admin")) view=AdminApp>
                     <Route path=StaticSegment("") view=SlidesPage/>
                     <Route path=StaticSegment("slides") view=SlidesPage/>
+                    <Route path=StaticSegment("settings") view=SettingsPage/>
                     <Route path=StaticSegment("users") view=UsersPageGate/>
                 </ParentRoute>
             </Routes>

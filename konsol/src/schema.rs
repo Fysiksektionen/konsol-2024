@@ -5,6 +5,8 @@ diesel::table! {
         id -> Integer,
         layout_type -> Text,
         color_mode -> Text,
+        live_mode -> Bool,
+        live_slides_url -> Text,
     }
 }
 

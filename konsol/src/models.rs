@@ -36,7 +36,13 @@ pub struct User {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[cfg_attr(
     feature = "ssr",
-    derive(diesel::Queryable, diesel::QueryableByName, diesel::Insertable, diesel::Selectable)
+    derive(
+        diesel::Queryable,
+        diesel::QueryableByName,
+        diesel::Insertable,
+        diesel::Selectable,
+        diesel::AsChangeset
+    )
 )]
 #[cfg_attr(feature = "ssr", diesel(table_name = settings))]
 #[cfg_attr(feature = "ssr", diesel(check_for_backend(diesel::sqlite::Sqlite)))]
@@ -44,6 +50,22 @@ pub struct Settings {
     pub id: i32,
     pub layout_type: String,
     pub color_mode: String,
+    /// When true (and `live_slides_url` is set), the screen shows a live
+    /// Google Slides embed instead of the uploaded slide images.
+    pub live_mode: bool,
+    pub live_slides_url: String,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Settings {
+            id: 1,
+            layout_type: "mixed".to_string(),
+            color_mode: "light_mode".to_string(),
+            live_mode: false,
+            live_slides_url: String::new(),
+        }
+    }
 }
 
 #[cfg(feature = "ssr")]

@@ -102,9 +102,24 @@ pub fn check_user(conn: &mut SqliteConnection, email_str: &str) -> Result<Option
 pub fn get_settings(conn: &mut SqliteConnection) -> Result<models::Settings, DbError> {
     use crate::schema::settings::dsl::*;
 
-    let setting = settings.first::<models::Settings>(conn)?;
+    // A fresh database has no settings row yet; treat that as defaults so
+    // both the screen and the admin settings page work before the first save.
+    let setting = settings.first::<models::Settings>(conn).optional()?;
 
-    Ok(setting)
+    Ok(setting.unwrap_or_default())
+}
+
+pub fn upsert_settings(conn: &mut SqliteConnection, new: models::Settings) -> Result<models::Settings, DbError> {
+    use crate::schema::settings::dsl::*;
+
+    diesel::insert_into(settings)
+        .values(&new)
+        .on_conflict(id)
+        .do_update()
+        .set(&new)
+        .execute(conn)?;
+
+    Ok(new)
 }
 
 #[cfg(test)]
