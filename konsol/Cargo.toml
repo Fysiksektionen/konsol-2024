@@ -61,7 +61,10 @@ ssr = [
 [package.metadata.leptos]
 output-name = "konsol"
 site-root = "target/site"
-site-pkg-dir = "pkg"
+# Everything the app serves lives under /konsol/ so a reverse proxy on the
+# deployment host only needs to route that one prefix (the server-fn prefix,
+# stylesheet hrefs, and slide image route are set to match).
+site-pkg-dir = "konsol/pkg"
 assets-dir = "public"
 site-addr = "127.0.0.1:8080"
 reload-port = 3001

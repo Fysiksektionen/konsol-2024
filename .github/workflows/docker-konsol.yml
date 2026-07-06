@@ -1,4 +1,4 @@
-name: Build and Publish Frontends
+name: Build and Publish Konsol
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}-web
+  IMAGE_NAME: ${{ github.repository }}-konsol
 
 jobs:
   build-and-push-image:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Login to the Container registry
         uses: docker/login-action@v3
         with:
@@ -34,12 +34,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push backend image
+      - name: Build and push konsol image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./konsol
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }} 

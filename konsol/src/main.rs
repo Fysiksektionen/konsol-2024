@@ -35,7 +35,7 @@ async fn main() {
     log::info!("starting konsol at http://{addr}");
 
     let app = Router::new()
-        .nest_service("/screen/slides/images", ServeDir::new(SLIDE_IMAGE_DIR))
+        .nest_service("/konsol/screen/slides/images", ServeDir::new(SLIDE_IMAGE_DIR))
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
             move || shell(leptos_options.clone())

@@ -31,7 +31,7 @@ pub fn AdminApp() -> impl IntoView {
     });
 
     view! {
-        <Stylesheet id="admin" href="/admin.css"/>
+        <Stylesheet id="admin" href="/konsol/admin.css"/>
         <script src="https://accounts.google.com/gsi/client" async=true defer=true></script>
         <script>
             r#"function handleCredentialResponse(response) {
@@ -263,7 +263,7 @@ fn SlideCard(slide: Slide, on_removed: impl Fn() + Copy + 'static) -> impl IntoV
 
     let truncated = truncate_chars(&slide.caption, 30);
     let indicator_class = format!("indicator {}", if slide.active { "active" } else { "inactive" });
-    let src = format!("/screen/slides/images/{}.{}", slide.id, slide.filetype);
+    let src = format!("/konsol/screen/slides/images/{}.{}", slide.id, slide.filetype);
     let date_range = format!(
         "{} \u{2013} {}",
         slide.start_date.format("%Y-%m-%d"),

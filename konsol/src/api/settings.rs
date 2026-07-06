@@ -1,7 +1,7 @@
 use crate::models::Settings;
 use leptos::prelude::*;
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn get_settings() -> Result<Settings, ServerFnError> {
     use crate::actions;
     use crate::db;
@@ -13,7 +13,7 @@ pub async fn get_settings() -> Result<Settings, ServerFnError> {
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn update_settings(
     layout_type: String,
     live_mode: bool,

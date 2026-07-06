@@ -4,7 +4,7 @@ use leptos::prelude::ServerFnError;
 use std::path::PathBuf;
 
 /// Directory slide images are saved in and served from. Everything in this
-/// directory gets served publicly under /screen/slides/images.
+/// directory gets served publicly under /konsol/screen/slides/images.
 pub const SLIDE_IMAGE_DIR: &str = "./slide_images";
 
 pub async fn save_image_bytes(bytes: &[u8], filename: &str, file_type: &str) -> Result<PathBuf, ServerFnError> {

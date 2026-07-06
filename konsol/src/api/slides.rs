@@ -1,7 +1,7 @@
 use crate::models::Slide;
 use leptos::prelude::*;
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn get_slides() -> Result<Vec<Slide>, ServerFnError> {
     use crate::actions;
     use crate::db;
@@ -13,7 +13,7 @@ pub async fn get_slides() -> Result<Vec<Slide>, ServerFnError> {
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
-#[server(input = server_fn::codec::MultipartFormData)]
+#[server(input = server_fn::codec::MultipartFormData, prefix = "/konsol/api")]
 pub async fn upload_slide(data: server_fn::codec::MultipartData) -> Result<Slide, ServerFnError> {
     use crate::actions;
     use crate::db;
@@ -99,7 +99,7 @@ pub async fn upload_slide(data: server_fn::codec::MultipartData) -> Result<Slide
     }
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn delete_slide(id: String) -> Result<(), ServerFnError> {
     use crate::actions;
     use crate::db;

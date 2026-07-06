@@ -3,10 +3,10 @@ name: Rust
 on:
   push:
     branches: [ "main" ]
-    paths: [ "backend/**" ]
+    paths: [ "konsol/**" ]
   pull_request:
     branches: [ "main" ]
-    paths: [ "backend/**" ]
+    paths: [ "konsol/**" ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -18,9 +18,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build
-      working-directory: ./backend
-      run: cargo build --verbose
+    - name: Build (server)
+      working-directory: ./konsol
+      run: cargo build --verbose --no-default-features --features ssr
     - name: Run tests
-      working-directory: ./backend
-      run: cargo test --verbose
+      working-directory: ./konsol
+      run: cargo test --verbose --features ssr

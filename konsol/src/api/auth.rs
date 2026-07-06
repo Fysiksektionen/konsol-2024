@@ -1,7 +1,7 @@
 use crate::models::{AuthenticatedUser, PermissionLevel, User};
 use leptos::prelude::*;
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn verify_google_credential(id_token: String) -> Result<AuthenticatedUser, ServerFnError> {
     use crate::actions;
     use crate::db;
@@ -34,7 +34,7 @@ pub async fn verify_google_credential(id_token: String) -> Result<AuthenticatedU
     Ok(user)
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn auth_status() -> Result<AuthenticatedUser, ServerFnError> {
     crate::session::require_auth().await
 }
@@ -45,19 +45,19 @@ pub async fn auth_status() -> Result<AuthenticatedUser, ServerFnError> {
 /// a second one — unlike a Vite build, there's no build-time bundling step
 /// to bake a `VITE_`-prefixed variable into the client JS, so this has to
 /// cross the client/server boundary at request time instead.
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn get_google_client_id() -> Result<String, ServerFnError> {
     std::env::var("GOOGLE_ID_TOKEN").map_err(|_| ServerFnError::new("GOOGLE_ID_TOKEN not set"))
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn logout() -> Result<(), ServerFnError> {
     crate::session::require_auth().await?;
     crate::session::clear_authenticated_user();
     Ok(())
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn add_user(email: String, permission: PermissionLevel) -> Result<User, ServerFnError> {
     use crate::actions;
     use crate::db;
@@ -77,7 +77,7 @@ pub async fn add_user(email: String, permission: PermissionLevel) -> Result<User
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn remove_user(id: String) -> Result<(), ServerFnError> {
     use crate::actions;
     use crate::db;
@@ -91,7 +91,7 @@ pub async fn remove_user(id: String) -> Result<(), ServerFnError> {
         .map_err(|e| ServerFnError::new(e.to_string()))
 }
 
-#[server]
+#[server(prefix = "/konsol/api")]
 pub async fn list_users() -> Result<Vec<User>, ServerFnError> {
     use crate::actions;
     use crate::db;

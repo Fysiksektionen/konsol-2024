@@ -24,7 +24,7 @@ pub fn ScreenApp() -> impl IntoView {
     });
 
     view! {
-        <Stylesheet id="screen" href="/screen.css"/>
+        <Stylesheet id="screen" href="/konsol/screen.css"/>
         <Suspense fallback=|| view! { <p>"Loading..."</p> }>
             {move || {
                 let s = settings.get().and_then(|r| r.ok()).unwrap_or_default();
@@ -92,7 +92,7 @@ fn MixedLayout(
     view! {
         <div id="root">
             <div class="header">
-                <img src="/assets/FrakturF2020.png" alt="Fraktur F" class="fysikf"/>
+                <img src="/konsol/assets/FrakturF2020.png" alt="Fraktur F" class="fysikf"/>
                 <h1>"KONSol"</h1>
             </div>
 
@@ -153,7 +153,7 @@ fn Slideshow(slides: Vec<Slide>) -> impl IntoView {
         <div>
             {move || {
                 let slide = slides[index.get()].clone();
-                let src = format!("/screen/slides/images/{}.{}", slide.id, slide.filetype);
+                let src = format!("/konsol/screen/slides/images/{}.{}", slide.id, slide.filetype);
                 view! {
                     <div>
                         <h2>{slide.caption.clone()}</h2>

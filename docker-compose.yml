@@ -1,22 +1,17 @@
 services:
-  backend:
+  konsol:
     build:
-      context: ./backend
+      context: ./konsol
       dockerfile: Dockerfile
     volumes:
-      - db_data:/app/data/db
-      - slides:/app/data/slides
+      - db_data:/app/data
+      - slides:/app/slide_images
     environment:
       - GOOGLE_ID_TOKEN=
-      # - COOKIE_SECRET_KEY= 
+      - GOOGLE_CALENDAR_API_KEY=
+      # - COOKIE_SECRET_KEY=
       - COOKIE_SECURE=false
-      - DATABASE_URL=sqlite:///app/data/db/konsol.db
-      - SLIDE_IMAGE_DIR=/app/data/slides
-
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+      - DATABASE_URL=sqlite:///app/data/konsol.db
     restart: unless-stopped
 
   nginx:
@@ -26,8 +21,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - web
-      - backend
+      - konsol
     restart: unless-stopped
 
 volumes:
